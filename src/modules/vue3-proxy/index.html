@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vue3 的資料綁定原理 (proxy & reflect)</title>
+</head>
+<body>
+  <script>
+    /* 實作 vue3 資料綁定原理 */
+    const user = {
+      name: 'Dylan',
+      age: 20
+    }
+
+    // 建立一個 user 的代理物件 
+    // Proxy MDN: https://developer.mozilla.org/zh-TW/docs/Web/JavaScript/Reference/Global_Objects/Proxy
+    const userProxy = new Proxy(user, {
+      get(target, property) {
+        // target 就是 user 物件
+        // property 為觸發時調用的屬性
+        console.log('「 get 」 method was been trigged')
+        console.log('target---', target)
+        console.log('property---', property)
+        return Reflect.get(target, property)
+      },
+      set(target, property, value) {
+        // value 為更改 user 時所賦予的新值
+        console.log('「 set 」 method was been trigged')
+        return Reflect.set(target , property, value)
+      },
+      deleteProperty(target, property) {
+        console.log('「 deleteProperty 」 method was been trigged')
+        return Reflect.deleteProperty(target, property)
+      }
+    })
+
+    /* 觸發 get 方法 */
+    console.log('userProxy--', userProxy.name)
+
+    /* 觸發 set 方法 */
+    userProxy.name = 'Tom'    
+    console.log('user---', user)
+    
+    /* 對代理物件新增屬性 (一樣會觸發 set 方法) */
+    userProxy.gender = 'male'
+    console.log('user---', user)
+
+    /* 刪除代理物件屬性（觸發 deleteProperty 方法）*/
+    delete userProxy.age
+    console.log('user---', user)
+
+  </script>
+</body>
+</html>
